@@ -90,16 +90,17 @@ class CanvasImage extends HTMLElement {
   attributeChangedCallback(name: string, _oldValue: string, newValue: string) {
     if (name === "src") {
       this.loadImage(newValue);
+      this.calculateImageZoom(true);
     }
   }
 
-  private calculateImageZoom() {
+  private calculateImageZoom(forceCenter: boolean = false) {
     if (!this.context || !this.source) return;
 
     this.displayWidth = (this.source.height * this.context.canvas.width * this.zoomFactor) / this.context.canvas.height;
     this.displayHeight = this.source.height * this.zoomFactor;
 
-    if (this.offsetX === 0) {
+    if (forceCenter || this.offsetX === 0) {
       this.offsetX = -this.displayWidth / 2 + this.source.width / 2;
     }
   }

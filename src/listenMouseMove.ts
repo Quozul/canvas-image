@@ -46,11 +46,13 @@ export function listenMouseMove(
     handleMove(event);
     evCache.push(event);
     previousDistance = calculateTouchDistance();
+    element.setPointerCapture(event.pointerId);
   };
 
   const handleEnd = (event: PointerEvent) => {
     const index = evCache.findIndex((cachedEv) => cachedEv.pointerId === event.pointerId);
     evCache.splice(index, 1);
+    element.releasePointerCapture(event.pointerId);
   };
 
   const handleWheel = (event: WheelEvent) => {
