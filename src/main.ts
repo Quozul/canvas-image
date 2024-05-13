@@ -1,6 +1,5 @@
 import { loadImagePromise } from "./loadImage.ts";
 import { listenMouseMove } from "./listenMouseMove.ts";
-import { listenZoom } from "./listenZoom.ts";
 
 class CanvasImage extends HTMLElement {
   static observedAttributes = ["src"];
@@ -27,6 +26,7 @@ class CanvasImage extends HTMLElement {
         width: 100%;
         height: 100%;
         touch-action: none;
+         box-sizing: border-box;
       }
     `;
     shadow.appendChild(style);
@@ -49,28 +49,30 @@ class CanvasImage extends HTMLElement {
     this.loadImage();
     window.requestAnimationFrame(this.draw);
 
-    listenMouseMove(this.canvas, (x, y) => {
-      if (!this.context) return;
-      this.offsetX += x * (this.displayWidth / this.context.canvas.width);
-      this.offsetY += y * (this.displayHeight / this.context.canvas.height);
-    });
+    listenMouseMove(
+      this.canvas,
+      (x, y) => {
+        if (!this.context) return;
+        this.offsetX += x * (this.displayWidth / this.context.canvas.width);
+        this.offsetY += y * (this.displayHeight / this.context.canvas.height);
+      },
+      (x: number, y: number, zoomLevel: number) => {
+        if (!this.context) return;
+        const zoomedX = (x / this.context.canvas.width) * this.displayWidth + this.offsetX;
+        const zoomedY = (y / this.context.canvas.height) * this.displayHeight + this.offsetY;
 
-    listenZoom(this.canvas, (x: number, y: number, zoomLevel: number) => {
-      if (!this.context) return;
-      const zoomedX = (x / this.context.canvas.width) * this.displayWidth + this.offsetX;
-      const zoomedY = (y / this.context.canvas.height) * this.displayHeight + this.offsetY;
+        const newZoomedX = (x / this.context.canvas.width) * (this.displayWidth * zoomLevel) + this.offsetX;
+        const newZoomedY = (y / this.context.canvas.height) * (this.displayHeight * zoomLevel) + this.offsetY;
 
-      const newZoomedX = (x / this.context.canvas.width) * (this.displayWidth * zoomLevel) + this.offsetX;
-      const newZoomedY = (y / this.context.canvas.height) * (this.displayHeight * zoomLevel) + this.offsetY;
+        const zoomX = zoomedX - newZoomedX;
+        const zoomY = zoomedY - newZoomedY;
 
-      const zoomX = zoomedX - newZoomedX;
-      const zoomY = zoomedY - newZoomedY;
-
-      this.offsetX += zoomX;
-      this.offsetY += zoomY;
-      this.zoomFactor = this.zoomFactor * zoomLevel;
-      this.calculateImageZoom();
-    });
+        this.offsetX += zoomX;
+        this.offsetY += zoomY;
+        this.zoomFactor = this.zoomFactor * zoomLevel;
+        this.calculateImageZoom();
+      },
+    );
   }
 
   disconnectedCallback() {
