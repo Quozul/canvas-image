@@ -1,47 +1,32 @@
 export function listenMouseMove(element: HTMLElement, callback: (deltaX: number, deltaY: number) => void) {
-  let isDown = false,
-    startX = 0,
-    startY = 0;
+  let previousPointerEvent: PointerEvent | null = null;
 
-  const handleMove = (event: MouseEvent | TouchEvent) => {
+  const handleMove = (event: PointerEvent) => {
+    event.stopPropagation();
     event.preventDefault();
-    const touch = "touches" in event ? event.touches[0] : event;
-    if (isDown) {
-      const offsetX = startX - touch.clientX;
-      const offsetY = startY - touch.clientY;
+
+    if (event.pointerId === previousPointerEvent?.pointerId) {
+      const offsetX = previousPointerEvent.clientX - event.clientX;
+      const offsetY = previousPointerEvent.clientY - event.clientY;
+
       callback(offsetX, offsetY);
+      previousPointerEvent = event;
     }
-    startX = touch.clientX;
-    startY = touch.clientY;
   };
 
-  const handleStart = (event: MouseEvent | TouchEvent) => {
-    event.preventDefault();
+  const handleStart = (event: PointerEvent) => {
     handleMove(event);
-    isDown = true;
+    previousPointerEvent = event;
   };
 
   const handleEnd = () => {
-    isDown = false;
+    previousPointerEvent = null;
   };
 
-  element.addEventListener("mousedown", handleStart);
-  element.addEventListener("touchstart", handleStart);
-  element.addEventListener("mousemove", handleMove);
-  element.addEventListener("touchmove", handleMove);
-  element.addEventListener("mouseup", handleEnd);
-  element.addEventListener("mouseleave", handleEnd);
-  element.addEventListener("touchend", handleEnd);
-  element.addEventListener("touchcancel", handleEnd);
-
-  return () => {
-    element.removeEventListener("mousedown", handleStart);
-    element.removeEventListener("touchstart", handleStart);
-    element.removeEventListener("mousemove", handleMove);
-    element.removeEventListener("touchmove", handleMove);
-    element.removeEventListener("mouseup", handleEnd);
-    element.removeEventListener("mouseleave", handleEnd);
-    element.removeEventListener("touchend", handleEnd);
-    element.removeEventListener("touchcancel", handleEnd);
-  };
+  element.addEventListener("pointerdown", handleStart);
+  element.addEventListener("pointermove", handleMove);
+  element.addEventListener("pointerup", handleEnd);
+  element.addEventListener("pointercancel", handleEnd);
+  element.addEventListener("pointerout", handleEnd);
+  element.addEventListener("pointerleave", handleEnd);
 }

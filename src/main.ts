@@ -20,10 +20,21 @@ class CanvasImage extends HTMLElement {
   }
 
   connectedCallback() {
+    const shadow = this.attachShadow({ mode: "open" });
+    const style = document.createElement("style");
+    style.textContent = `
+      canvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+    `;
+    shadow.appendChild(style);
+
     console.log("Custom element added to page.");
     this.canvas = document.createElement("canvas");
     this.context = this.canvas.getContext("2d");
-    this.appendChild(this.canvas);
+    shadow.appendChild(this.canvas);
 
     const resizeObserver = new ResizeObserver(() => {
       this.updateCanvasSize();
