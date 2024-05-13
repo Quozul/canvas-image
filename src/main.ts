@@ -13,6 +13,7 @@ class CanvasImage extends HTMLElement {
   private displayWidth: number = 0;
   private displayHeight: number = 0;
   private zoomFactor: number = 1;
+  private defaultZoom: number = 1;
 
   constructor() {
     super();
@@ -49,34 +50,24 @@ class CanvasImage extends HTMLElement {
     this.loadImage();
     window.requestAnimationFrame(this.draw);
 
-    listenMouseMove(
-      this.canvas,
-      (x, y) => {
-        if (!this.context) return;
-        this.offsetX += x;
-        this.offsetY += y;
+    listenMouseMove(this.canvas, this.fixOffsets.bind(this), (x: number, y: number, zoomLevel: number) => {
+      if (!this.context || !this.source) return;
 
-        if (!this.source) return;
-        this.offsetX = Math.max(0, Math.min(this.offsetX, this.context.canvas.width - this.displayWidth));
-        this.offsetY = Math.max(0, Math.min(this.offsetY, this.context.canvas.height - this.displayHeight));
-      },
-      (x: number, y: number, zoomLevel: number) => {
-        if (!this.context) return;
-        const zoomedX = (x / this.context.canvas.width) * this.displayWidth + this.offsetX;
-        const zoomedY = (y / this.context.canvas.height) * this.displayHeight + this.offsetY;
+      const newZoomFactor = this.zoomFactor * zoomLevel;
 
-        const newZoomedX = (x / this.context.canvas.width) * (this.displayWidth * zoomLevel) + this.offsetX;
-        const newZoomedY = (y / this.context.canvas.height) * (this.displayHeight * zoomLevel) + this.offsetY;
+      const newDisplayedWidth = this.source.width * newZoomFactor;
+      const newDisplayedHeight = this.source.height * newZoomFactor;
 
-        const zoomX = zoomedX - newZoomedX;
-        const zoomY = zoomedY - newZoomedY;
+      const currentWidth = this.displayWidth;
+      const currentHeight = this.displayHeight;
 
-        this.offsetX += zoomX;
-        this.offsetY += zoomY;
-        this.zoomFactor = this.zoomFactor * zoomLevel;
-        this.calculateImageZoom();
-      },
-    );
+      const additionalWidth = newDisplayedWidth - currentWidth;
+      const additionalHeight = newDisplayedHeight - currentHeight;
+
+      this.zoomFactor = newZoomFactor;
+      this.calculateImageZoom();
+      this.fixOffsets(-additionalWidth / 2, -additionalHeight / 2);
+    });
   }
 
   disconnectedCallback() {
@@ -98,11 +89,17 @@ class CanvasImage extends HTMLElement {
     }
   }
 
+  private fixOffsets(x: number, y: number) {
+    if (!this.context) return;
+    this.offsetX = Math.max(-this.displayWidth + 10, Math.min(this.offsetX + x, this.context.canvas.width - 10));
+    this.offsetY = Math.max(-this.displayHeight + 10, Math.min(this.offsetY + y, this.context.canvas.height - 10));
+  }
+
   private calculateImageZoom(forceCenter: boolean = false) {
     if (!this.context || !this.source) return;
 
     if (forceCenter) {
-      this.zoomFactor = Math.min(
+      this.defaultZoom = this.zoomFactor = Math.min(
         this.context.canvas.width / this.source.width,
         this.context.canvas.height / this.source.height,
       );
