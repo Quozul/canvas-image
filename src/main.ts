@@ -38,7 +38,7 @@ class CanvasImage extends HTMLElement {
 
     const resizeObserver = new ResizeObserver(() => {
       this.updateCanvasSize();
-      this.calculateImageZoom();
+      this.calculateImageZoom(true);
     });
 
     this.updateCanvasSize();
@@ -53,8 +53,12 @@ class CanvasImage extends HTMLElement {
       this.canvas,
       (x, y) => {
         if (!this.context) return;
-        this.offsetX += x * (this.displayWidth / this.context.canvas.width);
-        this.offsetY += y * (this.displayHeight / this.context.canvas.height);
+        this.offsetX += x;
+        this.offsetY += y;
+
+        if (!this.source) return;
+        this.offsetX = Math.max(0, Math.min(this.offsetX, this.context.canvas.width - this.displayWidth));
+        this.offsetY = Math.max(0, Math.min(this.offsetY, this.context.canvas.height - this.displayHeight));
       },
       (x: number, y: number, zoomLevel: number) => {
         if (!this.context) return;
@@ -97,11 +101,19 @@ class CanvasImage extends HTMLElement {
   private calculateImageZoom(forceCenter: boolean = false) {
     if (!this.context || !this.source) return;
 
-    this.displayWidth = (this.source.height * this.context.canvas.width * this.zoomFactor) / this.context.canvas.height;
+    if (forceCenter) {
+      this.zoomFactor = Math.min(
+        this.context.canvas.width / this.source.width,
+        this.context.canvas.height / this.source.height,
+      );
+    }
+
+    this.displayWidth = this.source.width * this.zoomFactor;
     this.displayHeight = this.source.height * this.zoomFactor;
 
-    if (forceCenter || this.offsetX === 0) {
-      this.offsetX = -this.displayWidth / 2 + this.source.width / 2;
+    if (forceCenter) {
+      this.offsetX = this.context.canvas.width / 2 - this.displayWidth / 2;
+      this.offsetY = this.context.canvas.height / 2 - this.displayHeight / 2;
     }
   }
 
@@ -113,14 +125,14 @@ class CanvasImage extends HTMLElement {
 
     this.context.drawImage(
       this.source,
+      0,
+      0,
+      this.source.width,
+      this.source.height,
       this.offsetX,
       this.offsetY,
       this.displayWidth,
       this.displayHeight,
-      0,
-      0,
-      this.context.canvas.width,
-      this.context.canvas.height,
     );
   };
 
@@ -130,7 +142,7 @@ class CanvasImage extends HTMLElement {
       return;
     }
     this.source = await loadImagePromise(src);
-    this.calculateImageZoom();
+    this.calculateImageZoom(true);
   }
 
   private updateCanvasSize() {

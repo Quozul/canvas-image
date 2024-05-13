@@ -10,7 +10,7 @@ export function listenMouseMove(
     if (evCache.length === 2) {
       const touch1 = evCache[0];
       const touch2 = evCache[1];
-      return Math.sqrt(Math.pow(touch1.clientX - touch2.clientX, 2) + Math.pow(touch1.clientY - touch2.clientY, 2));
+      return Math.sqrt(Math.pow(touch2.clientX - touch1.clientX, 2) + Math.pow(touch2.clientY - touch1.clientY, 2));
     }
     return 0;
   };
@@ -26,7 +26,7 @@ export function listenMouseMove(
     if (evCache.length === 2) {
       // Calculate the distance between the two pointers
       const currentDistance = calculateTouchDistance();
-      const zoomLevel = previousDistance / currentDistance;
+      const zoomLevel = currentDistance / previousDistance;
 
       const mouseX = event.clientX - element.clientLeft;
       const mouseY = event.clientY - element.clientTop;
@@ -35,8 +35,8 @@ export function listenMouseMove(
       previousDistance = currentDistance;
     }
 
-    const offsetX = (previousPointerEvent.clientX - event.clientX) / evCache.length;
-    const offsetY = (previousPointerEvent.clientY - event.clientY) / evCache.length;
+    const offsetX = (event.clientX - previousPointerEvent.clientX) / evCache.length;
+    const offsetY = (event.clientY - previousPointerEvent.clientY) / evCache.length;
     callback(offsetX, offsetY);
 
     evCache[index] = event;
@@ -56,7 +56,7 @@ export function listenMouseMove(
   };
 
   const handleWheel = (event: WheelEvent) => {
-    const delta = -event.deltaY;
+    const delta = event.deltaY;
     const zoomLevel = delta > 0 ? 0.9 : 1.1;
 
     const mouseX = event.clientX - element.clientLeft;
