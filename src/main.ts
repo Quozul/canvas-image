@@ -13,7 +13,6 @@ class CanvasImage extends HTMLElement {
   private displayWidth: number = 0;
   private displayHeight: number = 0;
   private zoomFactor: number = 1;
-  private defaultZoom: number = 1;
 
   constructor() {
     super();
@@ -66,20 +65,20 @@ class CanvasImage extends HTMLElement {
 
       this.zoomFactor = newZoomFactor;
       this.calculateImageZoom();
-      this.fixOffsets(-additionalWidth / 2, -additionalHeight / 2);
+
+      const imageX = x - this.offsetX;
+      const imageY = y - this.offsetY;
+
+      const centerPercentX = imageX / currentWidth;
+      const centerPercentY = imageY / currentHeight;
+      this.fixOffsets(-additionalWidth * centerPercentX, -additionalHeight * centerPercentY);
     });
   }
 
   disconnectedCallback() {
-    console.log("Custom element removed from page.");
-
     if (this.animationFrameId) {
       window.cancelAnimationFrame(this.animationFrameId);
     }
-  }
-
-  adoptedCallback() {
-    console.log("Custom element moved to new page.");
   }
 
   attributeChangedCallback(name: string, _oldValue: string, newValue: string) {
@@ -99,7 +98,7 @@ class CanvasImage extends HTMLElement {
     if (!this.context || !this.source) return;
 
     if (forceCenter) {
-      this.defaultZoom = this.zoomFactor = Math.min(
+      this.zoomFactor = Math.min(
         this.context.canvas.width / this.source.width,
         this.context.canvas.height / this.source.height,
       );
