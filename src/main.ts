@@ -122,10 +122,8 @@ class CanvasImage extends HTMLElement {
         this.context.canvas.height / this.source.height,
       );
 
-      this.maxZoom = Math.max(
-        this.source.width / this.context.canvas.width,
-        this.source.height / this.context.canvas.height,
-      );
+      this.minZoom *= 0.9;
+      this.maxZoom = 10;
     }
 
     this.displayWidth = this.source.width * this.zoomFactor;
@@ -193,8 +191,12 @@ class CanvasImage extends HTMLElement {
 
   private fixOffsets(x: number, y: number) {
     if (!this.context) return;
-    this.offsetX = between(this.offsetX + x, -this.displayWidth + 10, this.context.canvas.width - 10);
-    this.offsetY = between(this.offsetY + y, -this.displayHeight + 10, this.context.canvas.height - 10);
+    this.offsetX = between(this.offsetX + x, -this.displayWidth / 2, this.context.canvas.width - this.displayWidth / 2);
+    this.offsetY = between(
+      this.offsetY + y,
+      -this.displayHeight / 2,
+      this.context.canvas.height - this.displayHeight / 2,
+    );
   }
 
   private updateCanvasSize() {
