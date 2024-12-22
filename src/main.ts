@@ -75,7 +75,7 @@ class CanvasImage extends HTMLElement {
       const previousPointerEvent = this.evCache[index];
       const offsetX = (event.clientX - previousPointerEvent.clientX) / this.evCache.length;
       const offsetY = (event.clientY - previousPointerEvent.clientY) / this.evCache.length;
-      this.fixOffsets(offsetX, offsetY);
+      this.fixOffsets(offsetX, offsetY); // TODO: Fix offsets only on pointer end
 
       this.evCache[index] = event;
     };
@@ -191,12 +191,8 @@ class CanvasImage extends HTMLElement {
 
   private fixOffsets(x: number, y: number) {
     if (!this.context) return;
-    this.offsetX = between(this.offsetX + x, -this.displayWidth / 2, this.context.canvas.width - this.displayWidth / 2);
-    this.offsetY = between(
-      this.offsetY + y,
-      -this.displayHeight / 2,
-      this.context.canvas.height - this.displayHeight / 2,
-    );
+    this.offsetX = between(this.offsetX + x, 5 - this.displayWidth, this.clientWidth - 5);
+    this.offsetY = between(this.offsetY + y, 5 - this.displayHeight, this.clientHeight - 5);
   }
 
   private updateCanvasSize() {
