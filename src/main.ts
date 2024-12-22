@@ -1,5 +1,3 @@
-import { loadImagePromise } from "./loadImage.ts";
-
 class CanvasImage extends HTMLElement {
   static observedAttributes = ["src"];
 
@@ -212,5 +210,18 @@ const calculateTouchDistance = (evCache: PointerEvent[]) => {
   }
   return 0;
 };
+
+function loadImagePromise(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve) => {
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+
+    image.addEventListener("load", function () {
+      resolve(image);
+    });
+
+    image.src = src;
+  });
+}
 
 const between = (value: number, min: number, max: number): number => Math.max(min, Math.min(value, max));

@@ -1,7 +1,6 @@
 {
-  "name": "canvas-image",
-  "private": true,
-  "version": "0.0.0",
+  "name": "@quozul/canvas-image",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,8 +8,8 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "prettier": "^3.2.5",
-    "typescript": "^5.2.2",
-    "vite": "^5.2.0"
+    "prettier": "3.4.2",
+    "typescript": "5.7.2",
+    "vite": "6.0.5"
   }
 }
