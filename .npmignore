@@ -1,0 +1,9 @@
+/.github
+/dist
+/node_modules
+/public
+/.prettierrc.json
+/index.html
+/tsconfig.json
+/vite.config.ts
+/.idea

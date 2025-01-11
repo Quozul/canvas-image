@@ -183,7 +183,8 @@ class CanvasImage extends HTMLElement {
       this.source = null;
       return;
     }
-    this.source = await loadImagePromise(src);
+    const crossOrigin = this.getAttribute("crossOrigin");
+    this.source = await loadImagePromise(src, crossOrigin);
     this.calculateImageZoom(true);
   }
 
@@ -211,10 +212,10 @@ const calculateTouchDistance = (evCache: PointerEvent[]) => {
   return 0;
 };
 
-function loadImagePromise(src: string): Promise<HTMLImageElement> {
+function loadImagePromise(src: string, crossOrigin: string | null): Promise<HTMLImageElement> {
   return new Promise((resolve) => {
     const image = new Image();
-    image.crossOrigin = "anonymous";
+    image.crossOrigin = crossOrigin;
 
     image.addEventListener("load", function () {
       resolve(image);

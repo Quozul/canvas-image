@@ -1,7 +1,17 @@
 {
   "name": "@quozul/canvas-image",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "type": "module",
+  "main": "src/main.ts",
+  "exports": "src/main.ts",
+  "license": "MIT",
+  "homepage": "https://github.com/Quozul/canvas-image",
+  "author": {
+    "name": "Quozul"
+  },
+  "bugs": {
+    "url": "https://github.com/Quozul/canvas-image/issues"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

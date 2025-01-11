@@ -1,6 +1,9 @@
 # canvas-image
 A canvas to view image, zoom and pan.
 
+## Demo
+A demo page is available at: https://quozul.github.io/canvas-image/
+
 ## Usage
 
 ### Vanilla HTML
